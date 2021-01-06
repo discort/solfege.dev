@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
 */
 function getAPIHost() {
     var devHostList = ['127.0.0.1', '0.0.0.0', 'localhost'];
-    var host = 'http://solfege.tech';
+    var host = 'https://solfege.dev/';
     devHostList.forEach(function(entry) {
         if (document.location.href.includes(entry)) {
             host = 'http://127.0.0.1:8080/';

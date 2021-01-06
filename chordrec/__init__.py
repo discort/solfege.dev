@@ -1,8 +1,9 @@
 import logging
 import sys
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+from .utils import InvalidUsage
 
 
 def create_app(test_config=None):
@@ -21,6 +22,7 @@ def create_app(test_config=None):
     app.register_blueprint(api.bp_api)
     app.register_blueprint(api.bpu)
     configure_logging(app)
+    handle_errors(app)
     return app
 
 
@@ -33,3 +35,11 @@ def configure_logging(app):
         '%(asctime)s %(levelname)s: %(message)s ')
     )
     app.logger.addHandler(handler)
+
+
+def handle_errors(app):
+    @app.errorhandler(InvalidUsage)
+    def handle_invalid_usage(e):
+        response = jsonify(e.to_dict())
+        response.status_code = e.status_code
+        return response

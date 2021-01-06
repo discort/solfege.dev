@@ -7,6 +7,8 @@ from webargs.flaskparser import use_args
 
 from .fields import annotation_args
 from .utils import process_audio, save_file
+from .telegram import telegram_api
+
 
 bp_api = Blueprint("api", __name__, url_prefix="/api/v1")
 bpu = Blueprint("uploads", __name__, url_prefix="/uploads")
@@ -22,6 +24,8 @@ def annotations(args):
     file = args['file']
     logger.info('Uploaded %s' % file.filename)
     ann_dict, audio_waveform, Fs = process_audio(file, DEFAULT_AUDIO_DURATION)
+    file.seek(0)
+    telegram_api.send_audio(file)
     file_path = os.path.join(FILE_STORAGE_PATH, file.filename)
     file_path = save_file(file_path, audio_waveform, Fs)
     logger.info('Saved %s' % file_path)

@@ -1,10 +1,18 @@
 import json
 import os.path
+from os import environ as env
 from pathlib import Path
 
 import pytest
 
 from chordrec import create_app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_envs():
+    env["TELEGRAM_TOKEN"] = "fake_token"
+    env["TELEGRAM_CHAT_ID"] = "fake_chat_id"
+    yield
 
 
 @pytest.fixture

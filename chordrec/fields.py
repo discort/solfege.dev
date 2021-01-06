@@ -2,7 +2,7 @@ from webargs import fields, ValidationError
 
 
 def validate_file(file):
-    if not file.filename.lower().endswith(('.mp3', '.wav')):
+    if not file.filename.lower().endswith(('.mp3', )):
         raise ValidationError("Unsupported file format")
 
 
