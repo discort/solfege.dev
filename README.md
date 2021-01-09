@@ -4,6 +4,9 @@
     export TELEGRAM_CHAT_ID=<chat_id>
     python -m flask run --port 8080
 
+## Disabling TELEGRAM notifications
+    export DEBUG=True
+
 ## Run tests
     py.test -s
 

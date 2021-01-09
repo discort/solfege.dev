@@ -8,6 +8,11 @@ RUN apt-get update && apt-get -y dist-upgrade && apt-get install -y git \
 WORKDIR /wheels
 ADD ./requirements.txt /wheels
 
+# To make madmom working.
+# Feel free to remove when exclude madmom
+RUN pip install Cython==0.29.21
+RUN pip install numpy==1.19.2
+
 RUN pip install -r /wheels/requirements.txt \
                        -f /wheels \
         && rm -rf /wheels \

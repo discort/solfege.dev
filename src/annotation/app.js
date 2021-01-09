@@ -77,6 +77,13 @@ document.addEventListener('DOMContentLoaded', function() {
         playButton.style.display = '';
         pauseButton.style.display = 'none';
     });
+
+    /* Triggers to change a file */
+    addEvent(
+        document.getElementById('fileInput'),
+        'change',
+        function () { handleFileInput(this); }
+    );
 });
 
 /*
@@ -249,32 +256,49 @@ function showNote(region) {
     showNote.el.textContent = region.data.note || '–';
 }
 
-async function postData(url, data) {
+async function postData(url, data, successHandler, failureHandler) {
     var formData = new FormData();
     formData.append("file", data);
 
-    const response = await fetch(url, {
+    await fetch(url, {
         method: "POST",
         body: formData
+    })
+    .then(function (response) {
+        console.log(response);
+        if (response.status == 200) {
+            return successHandler(response.json())
+        } else {
+            return failureHandler(response.json())
+        }
+    })
+    .catch(function (error) {
+        console.log('Request failure: ', error);
     });
-    return response.json();
 }
 
 /*
 Upload audio to the server and get annotations and audiowaweform
 */
 function uploadAudio(fileName, fileData) {
-    postData(host + 'api/v1/annotations/', fileData)
-    .then(data => {
-        wavesurfer.load(
-            // Fetching .wav file from a server
-            host + 'uploads/' + fileName.replace(/\.[^/.]+$/, ".wav")
-        );
-
-        clearRegions();
-        loadRegions(data['annotations']);
-        saveRegions();
-    });
+    function success(response) {
+        response.then(function (data) {
+            wavesurfer.load(
+                // Fetching .wav file from a server
+                host + 'uploads/' + fileName.replace(/\.[^/.]+$/, ".wav")
+            );
+            clearRegions();
+            loadRegions(data['annotations']);
+            saveRegions();
+        });
+    }
+    function failure(response) {
+        response.then(function (data) {
+            console.log(data);
+            alert(JSON.stringify(data));
+        });
+    }
+    postData(host + 'api/v1/annotations/', fileData, success, failure);
 }
 
 /**
@@ -290,22 +314,29 @@ window.GLOBAL_ACTIONS['delete-region'] = function() {
 };
 
 window.GLOBAL_ACTIONS['open'] = function() {
-    var fileInput = document.getElementById('fileInput');
-    fileInput.addEventListener('change', function() {
-        var file = fileInput.files[0];
-        if (file) {
-            if (file.name.match(/\.(mp3|wav)$/)) {
-                var reader = new FileReader();
-
-                reader.onload = function() {
-                    uploadAudio(file.name, file);
-                };
-
-                reader.readAsText(file);
-            } else {
-                alert("File not supported, .mp3 or .wav files only");
-            }
-        }
-    });
-    fileInput.click();
+    document.getElementById('fileInput').click();
 };
+
+function handleFileInput(fileInput) {
+    var file = fileInput.files[0];
+    if (file) {
+        if (file.name.match(/\.(mp3|wav)$/)) {
+            var reader = new FileReader();
+
+            reader.onload = function() {
+                uploadAudio(file.name, file);
+            };
+
+            reader.readAsText(file);
+        } else {
+            alert("File not supported, .mp3 or .wav files only");
+        }
+    }
+}
+
+function addEvent(element, evnt, funct){
+    if (element.attachEvent)
+        return element.attachEvent('on'+evnt, funct);
+    else
+        return element.addEventListener(evnt, funct, false);
+}

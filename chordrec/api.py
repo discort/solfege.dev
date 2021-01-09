@@ -1,7 +1,7 @@
 import logging
 import os.path
 
-from flask import Blueprint, send_from_directory, jsonify
+from flask import Blueprint, send_from_directory, jsonify, current_app
 from flask_cors import cross_origin
 from webargs.flaskparser import use_args
 
@@ -25,7 +25,8 @@ def annotations(args):
     logger.info('Uploaded %s' % file.filename)
     ann_dict, audio_waveform, Fs = process_audio(file, DEFAULT_AUDIO_DURATION)
     file.seek(0)
-    telegram_api.send_audio(file)
+    if not current_app.config['DEBUG']:
+        telegram_api.send_audio(file)
     file_path = os.path.join(FILE_STORAGE_PATH, file.filename)
     file_path = save_file(file_path, audio_waveform, Fs)
     logger.info('Saved %s' % file_path)

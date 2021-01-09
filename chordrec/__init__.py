@@ -3,6 +3,7 @@ import sys
 
 from flask import Flask, jsonify
 from flask_cors import CORS
+from werkzeug import exceptions
 from .utils import InvalidUsage
 
 
@@ -42,4 +43,10 @@ def handle_errors(app):
     def handle_invalid_usage(e):
         response = jsonify(e.to_dict())
         response.status_code = e.status_code
+        return response
+
+    @app.errorhandler(exceptions.UnprocessableEntity)
+    def handle_422(e):
+        response = jsonify(e.data['messages'])
+        response.status_code = e.code
         return response

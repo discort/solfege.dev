@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import os
 import os.path
 import tempfile
@@ -68,7 +69,7 @@ def process_audio(audio, duration):
             audio_waveform=audio_waveform,
             sr=sr)
     except UnsupportedSampleRate as e:
-        raise InvalidUsage(str(e))
+        raise InvalidUsage(str(e), HTTPStatus.UNPROCESSABLE_ENTITY.value)
     ann_dict = ann_to_dict(ann)
     return ann_dict, audio_waveform, sr
 
